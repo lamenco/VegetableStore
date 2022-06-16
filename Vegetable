@@ -1,0 +1,119 @@
+class VegetableStore {
+
+    constructor(owner, location) {
+        this.owner = owner;
+        this.location = location;
+        this.availableProducts = [];
+    }
+    loadingVegetables(vegetables) {
+
+        const set = new Set();
+        let boundsToReturn = vegetables.length;
+        let boundsForArray = [];
+        let finalFinal = 'Successfully added '
+        vegetables.forEach((el) => {
+            boundsToReturn--;
+            let [type, quantity, price] = el.split(' ');
+
+            quantity = Number(quantity);
+            price = Number(price);
+            let currentProduct = {
+                type,
+                quantity,
+                price
+            }
+            let product;
+            let inArray = false;
+            for (const element of this.availableProducts) {
+                if (element.type == type) {
+                    inArray = true;
+                    product = element;
+                    if (currentProduct.price > product.price) {
+                        product.price = currentProduct.price
+                        product.quantity += currentProduct.quantity;
+                    }
+                }
+
+            }
+            if (!inArray) {
+                this.availableProducts.push(currentProduct);
+            }
+            set.add(currentProduct.type);
+            if (boundsToReturn == 0) {
+                for (const el of set) {
+                    boundsForArray.push(el)
+                }
+
+            }
+
+        })
+        boundsForArray
+        return finalFinal + boundsForArray.join(', ');
+    }
+
+    buyingVegetables(selectedProducts) {
+        let bill = 0.00;
+        let inArrayProduct = false;
+        let currProduct;
+        selectedProducts.forEach((el) => {
+            let [selectedType, selectedQuantity] = el.split(' ');
+            selectedQuantity = Number(selectedQuantity);
+            for (const product of this.availableProducts) {
+                if (product.type == selectedType) {
+                    inArrayProduct = true;
+                    currProduct = product;
+                    break;
+                }
+            }
+            if (!inArrayProduct) {
+                throw new Error(`${selectedType} is not available in the store, your current bill is $${bill.toFixed(2)}.`)
+            }
+
+            if (currProduct.quantity < selectedQuantity) {
+                throw new Error(`The quantity ${selectedQuantity} for the vegetable ${selectedType} is not available in the store, your current bill is $${bill.toFixed(2)}.`)
+            }
+
+            bill += currProduct.price * selectedQuantity;
+            currProduct.quantity-=selectedQuantity;
+            
+        })
+        return `Great choice! You must pay the following amount $${bill.toFixed(2)}.`;
+    }
+
+    rottingVegetable (type, quantity){
+        let inArrayProduct = false;
+        let currProduct;
+        for (let el of this.availableProducts) {
+            if(el.type== type){
+                inArrayProduct= true;
+                currProduct= el;
+                break;
+            }
+            if(!inArrayProduct){
+                throw new Error(`${type} is not available in the store.`);
+            }
+         
+        }   
+        if(quantity>=currProduct.quantity){
+            currProduct.quantity=0;
+        }else{
+            currProduct.quantity-=quantity;
+        }
+        if(currProduct.quantity==0){
+            return `The entire quantity of the ${type} has been removed.`
+        }else{
+            return `Some quantity of the ${type} has been removed.`
+        }
+    }
+    revision (){
+        let result = [];
+        result.push('Available vegetables:');
+        this.availableProducts.sort((a,b)=>{a.price-b.price})
+        for (let el of this.availableProducts) {
+            result.push(`${el.type}-${el.quantity}-${el.price}`)
+        }
+        result.push(`The owner of the store is ${this.owner}, and the location is ${this.location}.`)
+        return result.join('\n');
+    }
+
+}
